@@ -9,7 +9,9 @@ const redis = process.env.REDIS_URL
   : null;
 
 export async function getRedisData<T>(key: string): Promise<T[]> {
-  if (!redis) return [];
+  if (!redis) {
+    return [];
+  }
 
   try {
     const data = await redis.get(key);
@@ -21,7 +23,9 @@ export async function getRedisData<T>(key: string): Promise<T[]> {
 }
 
 export async function setRedisData<T>(key: string, data: T[]): Promise<void> {
-  if (!redis) return;
+  if (!redis) {
+    return;
+  }
 
   try {
     await redis.set(key, JSON.stringify(data), { ex: 86_400 }); // 24 hour expiry

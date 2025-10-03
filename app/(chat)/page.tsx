@@ -6,7 +6,7 @@ export default async function Page() {
   const session = await auth();
 
   if (!session) {
-    redirect("/api/auth/guest?redirectUrl=" + encodeURIComponent("/"));
+    redirect(`/api/auth/guest?redirectUrl=${encodeURIComponent("/")}`);
   }
 
   const id = generateUUID();

@@ -13,7 +13,8 @@ export function useRateLimit() {
     // Initialize state
     const updateState = () => {
       const count = Number.parseInt(
-        localStorage.getItem("guest_query_count") || "0"
+        localStorage.getItem("guest_query_count") || "0",
+        10
       );
       const apiKey = localStorage.getItem("user_gravixlayer_api_key");
 

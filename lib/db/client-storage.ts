@@ -2,16 +2,18 @@
 // Data is stored in user's browser (localStorage/IndexedDB)
 // Each user has their own private data
 
-import type { Chat, DBMessage, Suggestion, User } from "./schema";
+// Types are used in comments and function signatures
 
 // IndexedDB wrapper for larger storage capacity
 class ClientDB {
-  private dbName = "gravix-chat-db";
-  private version = 1;
-  private db: IDBDatabase | null = null;
+  private readonly dbName = "gravix-chat-db";
+  private readonly version = 1;
+  private readonly db: IDBDatabase | null = null;
 
   async init() {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     return new Promise<void>((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version);
@@ -46,11 +48,19 @@ class ClientDB {
   }
 
   async get<T>(storeName: string, key?: string): Promise<T[]> {
-    if (!this.db) await this.init();
-    if (!this.db) return [];
+    if (!this.db) {
+      await this.init();
+    }
+    if (!this.db) {
+      return [];
+    }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([storeName], "readonly");
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+      const transaction = this.db.transaction([storeName], "readonly");
       const store = transaction.objectStore(storeName);
 
       if (key) {
@@ -67,11 +77,19 @@ class ClientDB {
   }
 
   async put<T>(storeName: string, data: T): Promise<void> {
-    if (!this.db) await this.init();
-    if (!this.db) return;
+    if (!this.db) {
+      await this.init();
+    }
+    if (!this.db) {
+      return;
+    }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([storeName], "readwrite");
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+      const transaction = this.db.transaction([storeName], "readwrite");
       const store = transaction.objectStore(storeName);
       const request = store.put(data);
 
@@ -81,11 +99,19 @@ class ClientDB {
   }
 
   async delete(storeName: string, key: string): Promise<void> {
-    if (!this.db) await this.init();
-    if (!this.db) return;
+    if (!this.db) {
+      await this.init();
+    }
+    if (!this.db) {
+      return;
+    }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([storeName], "readwrite");
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+      const transaction = this.db.transaction([storeName], "readwrite");
       const store = transaction.objectStore(storeName);
       const request = store.delete(key);
 
@@ -99,11 +125,19 @@ class ClientDB {
     indexName: string,
     key: string
   ): Promise<T[]> {
-    if (!this.db) await this.init();
-    if (!this.db) return [];
+    if (!this.db) {
+      await this.init();
+    }
+    if (!this.db) {
+      return [];
+    }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([storeName], "readonly");
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+      const transaction = this.db.transaction([storeName], "readonly");
       const store = transaction.objectStore(storeName);
       const index = store.index(indexName);
       const request = index.getAll(key);
@@ -118,7 +152,9 @@ export const clientDB = new ClientDB();
 
 // Fallback to localStorage for simple data
 export function getLocalStorage<T>(key: string): T[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") {
+    return [];
+  }
 
   try {
     const data = localStorage.getItem(key);
@@ -129,11 +165,13 @@ export function getLocalStorage<T>(key: string): T[] {
 }
 
 export function setLocalStorage<T>(key: string, data: T[]): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   try {
     localStorage.setItem(key, JSON.stringify(data));
-  } catch (error) {
+  } catch (_error) {
     console.warn("LocalStorage full, using memory storage");
   }
 }

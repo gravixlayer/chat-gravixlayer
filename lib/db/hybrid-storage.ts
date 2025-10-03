@@ -1,7 +1,7 @@
 // Hybrid storage: Free database + client-side caching
 // Uses Supabase free tier + localStorage for optimal performance
 
-import type { Chat, DBMessage, User } from "./schema";
+import type { Chat, DBMessage } from "./schema";
 
 // Check if we have database connection
 const hasDatabase =
@@ -10,7 +10,7 @@ const hasDatabase =
 
 export class HybridStorage {
   // Cache data locally for faster access
-  private cache = new Map<string, any>();
+  private readonly cache = new Map<string, any>();
 
   async getChats(userId: string): Promise<Chat[]> {
     const cacheKey = `chats-${userId}`;
@@ -78,7 +78,9 @@ export class HybridStorage {
   }
 
   async saveMessages(messages: DBMessage[]): Promise<void> {
-    if (messages.length === 0) return;
+    if (messages.length === 0) {
+      return;
+    }
 
     const chatId = messages[0].chatId;
     const cacheKey = `messages-${chatId}`;

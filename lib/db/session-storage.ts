@@ -27,7 +27,11 @@ export function getSessionData(userId: string) {
       streams: [],
     });
   }
-  return sessionData.get(userId)!;
+  const data = sessionData.get(userId);
+  if (!data) {
+    throw new Error(`Session data not found for user: ${userId}`);
+  }
+  return data;
 }
 
 export function clearOldSessions() {

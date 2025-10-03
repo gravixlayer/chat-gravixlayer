@@ -48,7 +48,7 @@ const suggestions: Suggestion[] = globalThis.__db_suggestions;
 const votes: any[] = globalThis.__db_votes;
 const streams: any[] = globalThis.__db_streams;
 
-export async function getUser(email: string): Promise<User[]> {
+export function getUser(email: string): User[] {
   try {
     return users.filter((user) => user.email === email);
   } catch (_error) {
@@ -126,17 +126,23 @@ export async function deleteChatById({ id }: { id: string }) {
   try {
     // Remove related votes, messages, and streams
     const voteIndex = votes.findIndex((v) => v.chatId === id);
-    if (voteIndex !== -1) votes.splice(voteIndex, 1);
+    if (voteIndex !== -1) {
+      votes.splice(voteIndex, 1);
+    }
 
     const messageIndexes = messages
       .map((m, i) => (m.chatId === id ? i : -1))
       .filter((i) => i !== -1);
-    messageIndexes.reverse().forEach((i) => messages.splice(i, 1));
+    for (const i of messageIndexes.reverse()) {
+      messages.splice(i, 1);
+    }
 
     const streamIndexes = streams
       .map((s, i) => (s.chatId === id ? i : -1))
       .filter((i) => i !== -1);
-    streamIndexes.reverse().forEach((i) => streams.splice(i, 1));
+    for (const i of streamIndexes.reverse()) {
+      streams.splice(i, 1);
+    }
 
     const chatIndex = chats.findIndex((c) => c.id === id);
     if (chatIndex !== -1) {
@@ -210,7 +216,7 @@ export async function getChatsByUserId({
   }
 }
 
-export async function getChatById({ id }: { id: string }) {
+export function getChatById({ id }: { id: string }) {
   try {
     const selectedChat = chats.find((c) => c.id === id);
     return selectedChat || null;
@@ -232,7 +238,7 @@ export async function saveMessages({
   }
 }
 
-export async function getMessagesByChatId({ id }: { id: string }) {
+export function getMessagesByChatId({ id }: { id: string }) {
   try {
     return messages
       .filter((m) => m.chatId === id)
@@ -274,7 +280,7 @@ export async function voteMessage({
   }
 }
 
-export async function getVotesByChatId({ id }: { id: string }) {
+export function getVotesByChatId({ id }: { id: string }) {
   try {
     return votes.filter((v) => v.chatId === id);
   } catch (_error) {
