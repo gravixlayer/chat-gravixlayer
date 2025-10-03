@@ -1,6 +1,8 @@
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
+  secret:
+    process.env.AUTH_SECRET || "fallback-secret-for-testing-only-not-secure",
   pages: {
     signIn: "/login",
     newUser: "/",

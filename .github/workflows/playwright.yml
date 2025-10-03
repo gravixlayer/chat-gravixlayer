@@ -10,10 +10,11 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'test-secret-for-ci-only-not-secure-a1c2408e2c399e4d6c10228beabc7313' }}
       POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
       BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
       REDIS_URL: ${{ secrets.REDIS_URL }}
+      GRAVIXLAYER_API_KEY: ${{ secrets.GRAVIXLAYER_API_KEY || 'test-api-key-for-ci' }}
 
     steps:
       - uses: actions/checkout@v4
