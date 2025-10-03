@@ -60,6 +60,8 @@ export function getUser(email: string): User[] {
 }
 
 export async function createUser(email: string, password: string) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   const hashedPassword = generateHashedPassword(password);
 
   try {
@@ -76,6 +78,8 @@ export async function createUser(email: string, password: string) {
 }
 
 export async function createGuestUser() {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   const email = `guest-${Date.now()}`;
   const password = generateHashedPassword(generateUUID());
 
@@ -106,6 +110,8 @@ export async function saveChat({
   title: string;
   visibility: VisibilityType;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const newChat: Chat = {
       id,
@@ -123,6 +129,8 @@ export async function saveChat({
 }
 
 export async function deleteChatById({ id }: { id: string }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     // Remove related votes, messages, and streams
     const voteIndex = votes.findIndex((v) => v.chatId === id);
@@ -170,6 +178,8 @@ export async function getChatsByUserId({
   startingAfter: string | null;
   endingBefore: string | null;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const userChats = chats.filter((c) => c.userId === id);
     userChats.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -230,6 +240,8 @@ export async function saveMessages({
 }: {
   messages: DBMessage[];
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     messages.push(...newMessages);
     return newMessages;
@@ -260,6 +272,8 @@ export async function voteMessage({
   messageId: string;
   type: "up" | "down";
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const existingVoteIndex = votes.findIndex((v) => v.messageId === messageId);
 
@@ -304,6 +318,8 @@ export async function saveDocument({
   content: string;
   userId: string;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const newDocument = {
       id,
@@ -321,6 +337,8 @@ export async function saveDocument({
 }
 
 export async function getDocumentsById({ id }: { id: string }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     return documents
       .filter((d) => d.id === id)
@@ -334,6 +352,8 @@ export async function getDocumentsById({ id }: { id: string }) {
 }
 
 export async function getDocumentById({ id }: { id: string }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const docs = documents
       .filter((d) => d.id === id)
@@ -354,6 +374,8 @@ export async function deleteDocumentsByIdAfterTimestamp({
   id: string;
   timestamp: Date;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     // Remove related suggestions
     const suggestionIndexes = suggestions
@@ -361,14 +383,18 @@ export async function deleteDocumentsByIdAfterTimestamp({
         s.documentId === id && s.documentCreatedAt > timestamp ? i : -1
       )
       .filter((i) => i !== -1);
-    suggestionIndexes.reverse().forEach((i) => suggestions.splice(i, 1));
+    for (const i of suggestionIndexes.reverse()) {
+      suggestions.splice(i, 1);
+    }
 
     // Remove documents
     const docIndexes = documents
       .map((d, i) => (d.id === id && d.createdAt > timestamp ? i : -1))
       .filter((i) => i !== -1);
     const deletedDocs = docIndexes.map((i) => documents[i]);
-    docIndexes.reverse().forEach((i) => documents.splice(i, 1));
+    for (const i of docIndexes.reverse()) {
+      documents.splice(i, 1);
+    }
 
     return deletedDocs;
   } catch (_error) {
@@ -384,6 +410,8 @@ export async function saveSuggestions({
 }: {
   suggestions: Suggestion[];
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     suggestions.push(...newSuggestions);
     return newSuggestions;
@@ -400,6 +428,8 @@ export async function getSuggestionsByDocumentId({
 }: {
   documentId: string;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     return suggestions.filter((s) => s.documentId === documentId);
   } catch (_error) {
@@ -411,6 +441,8 @@ export async function getSuggestionsByDocumentId({
 }
 
 export async function getMessageById({ id }: { id: string }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     return messages.filter((m) => m.id === id);
   } catch (_error) {
@@ -428,6 +460,8 @@ export async function deleteMessagesByChatIdAfterTimestamp({
   chatId: string;
   timestamp: Date;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const messagesToDelete = messages.filter(
       (m) => m.chatId === chatId && m.createdAt >= timestamp
@@ -442,7 +476,9 @@ export async function deleteMessagesByChatIdAfterTimestamp({
           v.chatId === chatId && messageIds.includes(v.messageId) ? i : -1
         )
         .filter((i) => i !== -1);
-      voteIndexes.reverse().forEach((i) => votes.splice(i, 1));
+      for (const i of voteIndexes.reverse()) {
+        votes.splice(i, 1);
+      }
 
       // Remove messages
       const messageIndexes = messages
@@ -450,7 +486,9 @@ export async function deleteMessagesByChatIdAfterTimestamp({
           m.chatId === chatId && messageIds.includes(m.id) ? i : -1
         )
         .filter((i) => i !== -1);
-      messageIndexes.reverse().forEach((i) => messages.splice(i, 1));
+      for (const i of messageIndexes.reverse()) {
+        messages.splice(i, 1);
+      }
     }
   } catch (_error) {
     throw new ChatSDKError(
@@ -467,6 +505,8 @@ export async function updateChatVisiblityById({
   chatId: string;
   visibility: "private" | "public";
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const chat = chats.find((c) => c.id === chatId);
     if (chat) {
@@ -489,6 +529,8 @@ export async function updateChatLastContextById({
   // Store merged server-enriched usage object
   context: AppUsage;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const chat = chats.find((c) => c.id === chatId);
     if (chat) {
@@ -508,6 +550,8 @@ export async function getMessageCountByUserId({
   id: string;
   differenceInHours: number;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     const twentyFourHoursAgo = new Date(
       Date.now() - differenceInHours * 60 * 60 * 1000
@@ -539,6 +583,8 @@ export async function createStreamId({
   streamId: string;
   chatId: string;
 }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     streams.push({ id: streamId, chatId, createdAt: new Date() });
   } catch (_error) {
@@ -550,6 +596,8 @@ export async function createStreamId({
 }
 
 export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
   try {
     return streams
       .filter((s) => s.chatId === chatId)
