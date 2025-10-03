@@ -1,52 +1,25 @@
 "use client";
 
 import { useMemo } from "react";
-import useSWR, { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
-import { updateChatVisibility } from "@/app/(chat)/actions";
-import {
-  type ChatHistory,
-  getChatHistoryPaginationKey,
-} from "@/components/sidebar-history";
 import type { VisibilityType } from "@/components/visibility-selector";
 
 export function useChatVisibility({
-  chatId,
-  initialVisibilityType,
+  _chatId,
+  _initialVisibilityType,
 }: {
   chatId: string;
   initialVisibilityType: VisibilityType;
 }) {
-  const { mutate, cache } = useSWRConfig();
-  const history: ChatHistory = cache.get("/api/history")?.data;
-
-  const { data: localVisibility, mutate: setLocalVisibility } = useSWR(
-    `${chatId}-visibility`,
-    null,
-    {
-      fallbackData: initialVisibilityType,
-    }
-  );
+  // Unused parameters kept for compatibility
 
   const visibilityType = useMemo(() => {
-    if (!history) {
-      return localVisibility;
-    }
-    const chat = history.chats.find((currentChat) => currentChat.id === chatId);
-    if (!chat) {
-      return "private";
-    }
-    return chat.visibility;
-  }, [history, chatId, localVisibility]);
+    // Always return "private" - visibility selector is hidden
+    return "private" as VisibilityType;
+  }, []);
 
-  const setVisibilityType = (updatedVisibilityType: VisibilityType) => {
-    setLocalVisibility(updatedVisibilityType);
-    mutate(unstable_serialize(getChatHistoryPaginationKey));
-
-    updateChatVisibility({
-      chatId,
-      visibility: updatedVisibilityType,
-    });
+  const setVisibilityType = (_updatedVisibilityType: VisibilityType) => {
+    // Do nothing - visibility is always private and cannot be changed
+    console.log("Visibility change blocked - all chats are private");
   };
 
   return { visibilityType, setVisibilityType };

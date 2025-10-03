@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { ChatHeader } from "@/components/chat-header";
@@ -22,6 +22,7 @@ import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { Vote } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
+import { incrementGuestQueryCount, isGuestRateLimited } from "@/lib/rate-limit";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
@@ -85,6 +86,12 @@ export function Chat({
       api: "/api/chat",
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
+        // Get user's API key from localStorage
+        const userApiKey =
+          typeof window !== "undefined"
+            ? localStorage.getItem("user_gravixlayer_api_key")
+            : null;
+
         return {
           body: {
             id: request.id,
@@ -93,6 +100,11 @@ export function Chat({
             selectedVisibilityType: visibilityType,
             ...request.body,
           },
+          headers: userApiKey
+            ? {
+                "x-user-api-key": userApiKey,
+              }
+            : undefined,
         };
       },
     }),
@@ -118,9 +130,52 @@ export function Chat({
             description: error.message,
           });
         }
+      } else if (error instanceof Error) {
+        // Handle rate limit error
+        if (error.message?.includes("rate_limit_exceeded")) {
+          toast({
+            type: "error",
+            description:
+              "You've reached the free usage limit. Please add your API key to continue chatting.",
+          });
+        } else {
+          toast({
+            type: "error",
+            description: error.message,
+          });
+        }
       }
     },
   });
+
+  // Wrapper function to add rate limiting
+  const sendMessageWithRateLimit = useCallback(
+    async (message: any) => {
+      // Get user's API key from localStorage
+      const userApiKey =
+        typeof window !== "undefined"
+          ? localStorage.getItem("user_gravixlayer_api_key")
+          : null;
+
+      // Check rate limiting for users without API key
+      if (!userApiKey && typeof window !== "undefined") {
+        if (isGuestRateLimited()) {
+          toast({
+            type: "error",
+            description:
+              "You've reached the free usage limit. Please add your API key to continue chatting.",
+          });
+          return;
+        }
+        // Increment query count for guests without API key
+        incrementGuestQueryCount();
+      }
+
+      // Send the message
+      return await sendMessage(message);
+    },
+    [sendMessage]
+  );
 
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
@@ -129,7 +184,7 @@ export function Chat({
 
   useEffect(() => {
     if (query && !hasAppendedQuery) {
-      sendMessage({
+      sendMessageWithRateLimit({
         role: "user" as const,
         parts: [{ type: "text", text: query }],
       });
@@ -137,11 +192,19 @@ export function Chat({
       setHasAppendedQuery(true);
       window.history.replaceState({}, "", `/chat/${id}`);
     }
-  }, [query, sendMessage, hasAppendedQuery, id]);
+  }, [query, sendMessageWithRateLimit, hasAppendedQuery, id]);
 
   const { data: votes } = useSWR<Vote[]>(
+    // Only fetch votes if we have messages (votes API now handles missing chats gracefully)
     messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
-    fetcher
+    fetcher,
+    {
+      onError: (error) => {
+        // Silently handle vote fetching errors for new chats
+        console.debug("Vote fetching error (expected for new chats):", error);
+      },
+      fallbackData: [],
+    }
   );
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -185,7 +248,7 @@ export function Chat({
               onModelChange={setCurrentModelId}
               selectedModelId={currentModelId}
               selectedVisibilityType={visibilityType}
-              sendMessage={sendMessage}
+              sendMessage={sendMessageWithRateLimit}
               setAttachments={setAttachments}
               setInput={setInput}
               setMessages={setMessages}
@@ -206,7 +269,7 @@ export function Chat({
         regenerate={regenerate}
         selectedModelId={currentModelId}
         selectedVisibilityType={visibilityType}
-        sendMessage={sendMessage}
+        sendMessage={sendMessageWithRateLimit}
         setAttachments={setAttachments}
         setInput={setInput}
         setMessages={setMessages}

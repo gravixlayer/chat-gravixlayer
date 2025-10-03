@@ -13,8 +13,32 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = params;
   const chat = await getChatById({ id });
 
+  // If chat doesn't exist, create a new one with the provided ID
   if (!chat) {
-    notFound();
+    const session = await auth();
+
+    if (!session) {
+      redirect("/api/auth/guest");
+    }
+
+    // Return a new chat with the provided ID
+    const cookieStore = await cookies();
+    const chatModelFromCookie = cookieStore.get("chat-model");
+
+    return (
+      <>
+        <Chat
+          autoResume={false}
+          id={id}
+          initialChatModel={chatModelFromCookie?.value || DEFAULT_CHAT_MODEL}
+          initialLastContext={undefined}
+          initialMessages={[]}
+          initialVisibilityType="private"
+          isReadonly={false}
+        />
+        <DataStreamHandler />
+      </>
+    );
   }
 
   const session = await auth();

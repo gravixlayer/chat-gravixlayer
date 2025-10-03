@@ -21,8 +21,9 @@ export async function GET(request: Request) {
 
   const chat = await getChatById({ id: chatId });
 
+  // If chat doesn't exist yet (new chat), return empty votes array
   if (!chat) {
-    return new ChatSDKError("not_found:chat").toResponse();
+    return Response.json([], { status: 200 });
   }
 
   if (chat.userId !== session.user.id) {
@@ -57,8 +58,12 @@ export async function PATCH(request: Request) {
 
   const chat = await getChatById({ id: chatId });
 
+  // If chat doesn't exist yet, we can't vote on it
   if (!chat) {
-    return new ChatSDKError("not_found:vote").toResponse();
+    return new ChatSDKError(
+      "not_found:chat",
+      "Chat not found. Please send a message first."
+    ).toResponse();
   }
 
   if (chat.userId !== session.user.id) {
