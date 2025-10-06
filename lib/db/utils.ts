@@ -1,16 +1,20 @@
 import { generateId } from "ai";
-import { genSaltSync, hashSync } from "bcrypt-ts";
 
-export function generateHashedPassword(password: string) {
-  const salt = genSaltSync(10);
-  const hash = hashSync(password, salt);
-
-  return hash;
+export async function generateHashedPassword(password: string) {
+  // Use Web Crypto API for Edge Runtime compatibility
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hashHex;
 }
 
-export function generateDummyPassword() {
+export async function generateDummyPassword() {
   const password = generateId();
-  const hashedPassword = generateHashedPassword(password);
+  const hashedPassword = await generateHashedPassword(password);
 
   return hashedPassword;
 }

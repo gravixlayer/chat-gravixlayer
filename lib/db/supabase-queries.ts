@@ -70,7 +70,7 @@ export async function createUser(
   password: string
 ): Promise<User[]> {
   try {
-    const hashedPassword = generateHashedPassword(password);
+    const hashedPassword = await generateHashedPassword(password);
     const newUser = {
       id: generateUUID(),
       email,
@@ -93,7 +93,7 @@ export async function createUser(
 export async function createGuestUser(): Promise<User[]> {
   try {
     const email = `guest-${Date.now()}`;
-    const password = generateHashedPassword(generateUUID());
+    const password = await generateHashedPassword(generateUUID());
     const newUser = {
       id: generateUUID(),
       email,

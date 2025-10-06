@@ -1,4 +1,4 @@
-import type { LanguageModel } from "ai";
+import type { CoreMessage, LanguageModel } from "ai";
 
 const createMockModel = (): LanguageModel => {
   return {
@@ -9,7 +9,7 @@ const createMockModel = (): LanguageModel => {
     supportedUrls: [],
     supportsImageUrls: false,
     supportsStructuredOutputs: false,
-    doGenerate: ({ messages }) => {
+    doGenerate: ({ messages }: { messages: CoreMessage[] }) => {
       // Get the last user message to determine response
       const lastMessage = messages.at(-1);
       const userText = lastMessage?.content?.[0]?.text || "";
@@ -30,7 +30,7 @@ const createMockModel = (): LanguageModel => {
         warnings: [],
       });
     },
-    doStream: ({ messages }) => {
+    doStream: ({ messages }: { messages: CoreMessage[] }) => {
       // Get the last user message to determine response
       const lastMessage = messages.at(-1);
       const userText = lastMessage?.content?.[0]?.text || "";

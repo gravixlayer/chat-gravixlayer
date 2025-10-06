@@ -3,8 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { signIn } from "@/app/(auth)/auth";
 import { isDevelopmentEnvironment } from "@/lib/constants";
 
-// Use Vercel Edge Runtime for faster auth
-export const runtime = "edge";
+// Use Node.js runtime for auth operations
 export const preferredRegion = "auto";
 
 export async function GET(request: Request) {

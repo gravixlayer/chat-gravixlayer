@@ -3,8 +3,7 @@ import { auth } from "@/app/(auth)/auth";
 import { getChatsByUserId } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 
-// Use Vercel Edge Runtime for faster cold starts
-export const runtime = "edge";
+// Use Node.js runtime for database operations
 export const preferredRegion = "auto";
 
 export async function GET(request: NextRequest) {

@@ -99,7 +99,7 @@ export async function createUser(email: string, password: string) {
     return users[0]; // Return single user for compatibility
   }
 
-  const hashedPassword = generateHashedPassword(password);
+  const hashedPassword = await generateHashedPassword(password);
 
   try {
     const newUser: User = {
@@ -118,7 +118,7 @@ export async function createGuestUser() {
   // Simulate async operation for future database compatibility
   await Promise.resolve();
   const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
+  const password = await generateHashedPassword(generateUUID());
 
   try {
     const newUser: User = {
