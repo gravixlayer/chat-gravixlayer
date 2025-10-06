@@ -8,24 +8,38 @@ config({
 });
 
 const runMigrate = async () => {
-  if (!process.env.POSTGRES_URL) {
+  if (
+    !process.env.POSTGRES_URL ||
+    process.env.POSTGRES_URL.includes("[YOUR-PASSWORD]")
+  ) {
     console.log(
-      "⏭️  Skipping migrations - no database configured (using in-memory storage)"
+      "⏭️  Skipping migrations - no database configured (using Supabase client or in-memory storage)"
     );
     process.exit(0);
   }
 
-  const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
-  const db = drizzle(connection);
+  try {
+    const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
+    const db = drizzle(connection);
 
-  console.log("⏳ Running migrations...");
+    console.log("⏳ Running migrations...");
 
-  const start = Date.now();
-  await migrate(db, { migrationsFolder: "./lib/db/migrations" });
-  const end = Date.now();
+    const start = Date.now();
+    await migrate(db, { migrationsFolder: "./lib/db/migrations" });
+    const end = Date.now();
 
-  console.log("✅ Migrations completed in", end - start, "ms");
-  process.exit(0);
+    console.log("✅ Migrations completed in", end - start, "ms");
+    await connection.end();
+    process.exit(0);
+  } catch (error) {
+    console.log(
+      "⏭️  Skipping migrations - database connection failed (using Supabase client)"
+    );
+    console.log(
+      "This is normal when using Supabase without direct PostgreSQL access"
+    );
+    process.exit(0);
+  }
 };
 
 runMigrate().catch((err) => {

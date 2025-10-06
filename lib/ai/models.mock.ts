@@ -12,7 +12,17 @@ const createMockModel = (): LanguageModel => {
     doGenerate: ({ messages }: { messages: CoreMessage[] }) => {
       // Get the last user message to determine response
       const lastMessage = messages.at(-1);
-      const userText = lastMessage?.content?.[0]?.text || "";
+
+      // Handle different content types safely
+      let userText = "";
+      if (typeof lastMessage?.content === "string") {
+        userText = lastMessage.content;
+      } else if (Array.isArray(lastMessage?.content)) {
+        const textPart = lastMessage.content.find(
+          (part) => typeof part === "object" && part !== null && "text" in part
+        );
+        userText = (textPart as any)?.text || "";
+      }
 
       let responseText = "It's just green duh!"; // default
 
@@ -33,7 +43,17 @@ const createMockModel = (): LanguageModel => {
     doStream: ({ messages }: { messages: CoreMessage[] }) => {
       // Get the last user message to determine response
       const lastMessage = messages.at(-1);
-      const userText = lastMessage?.content?.[0]?.text || "";
+
+      // Handle different content types safely
+      let userText = "";
+      if (typeof lastMessage?.content === "string") {
+        userText = lastMessage.content;
+      } else if (Array.isArray(lastMessage?.content)) {
+        const textPart = lastMessage.content.find(
+          (part) => typeof part === "object" && part !== null && "text" in part
+        );
+        userText = (textPart as any)?.text || "";
+      }
 
       let responseText = "It's just green duh!"; // default
 
