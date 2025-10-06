@@ -256,11 +256,42 @@ export async function getChatsByUserId({
   }
 }
 
+// Production-optimized cache with longer TTL
+const chatCache = new Map<string, { chat: Chat | null; timestamp: number }>();
+const messageCache = new Map<string, { messages: any[]; timestamp: number }>();
+const userCache = new Map<string, { users: any[]; timestamp: number }>();
+
+// Dynamic cache TTL based on environment
+const CACHE_TTL =
+  process.env.NODE_ENV === "production"
+    ? 10 * 60 * 1000 // 10 minutes in production
+    : 2 * 60 * 1000; // 2 minutes in development
+
+// Cache cleanup to prevent memory leaks in serverless
+const MAX_CACHE_SIZE = 1000;
+function cleanupCache(cache: Map<string, any>) {
+  if (cache.size > MAX_CACHE_SIZE) {
+    const entries = Array.from(cache.entries());
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    // Remove oldest 20% of entries
+    const toRemove = Math.floor(entries.length * 0.2);
+    for (let i = 0; i < toRemove; i++) {
+      cache.delete(entries[i][0]);
+    }
+  }
+}
+
 export async function getChatById({
   id,
 }: {
   id: string;
 }): Promise<Chat | null> {
+  // Check cache first
+  const cached = chatCache.get(id);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.chat;
+  }
+
   try {
     const { data, error } = await supabase
       .from("chats")
@@ -269,11 +300,15 @@ export async function getChatById({
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") return null; // Not found
+      if (error.code === "PGRST116") {
+        // Cache null result to avoid repeated queries
+        chatCache.set(id, { chat: null, timestamp: Date.now() });
+        return null;
+      }
       throw error;
     }
 
-    return {
+    const chat: Chat = {
       id: data.id,
       userId: data.user_id,
       title: data.title,
@@ -281,6 +316,11 @@ export async function getChatById({
       createdAt: new Date(data.created_at),
       lastContext: data.last_context,
     };
+
+    // Cache the result with cleanup
+    cleanupCache(chatCache);
+    chatCache.set(id, { chat, timestamp: Date.now() });
+    return chat;
   } catch (error) {
     console.error("Error getting chat by ID:", error);
     throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
@@ -328,6 +368,12 @@ export async function getMessagesByChatId({
 }: {
   id: string;
 }): Promise<DBMessage[]> {
+  // Check cache first
+  const cached = messageCache.get(id);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.messages;
+  }
+
   try {
     const { data, error } = await supabase
       .from("messages")
@@ -337,7 +383,7 @@ export async function getMessagesByChatId({
 
     if (error) throw error;
 
-    return (data || []).map((msg) => ({
+    const messages = (data || []).map((msg) => ({
       id: msg.id,
       chatId: msg.chat_id,
       role: msg.role as "user" | "assistant",
@@ -345,6 +391,11 @@ export async function getMessagesByChatId({
       attachments: msg.attachments,
       createdAt: new Date(msg.created_at),
     }));
+
+    // Cache the result with cleanup
+    cleanupCache(messageCache);
+    messageCache.set(id, { messages, timestamp: Date.now() });
+    return messages;
   } catch (error) {
     console.error("Error getting messages by chat ID:", error);
     throw new ChatSDKError(

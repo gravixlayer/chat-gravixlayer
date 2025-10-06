@@ -7,12 +7,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-// Create client with service role key for server-side operations
-// This bypasses RLS since we're handling auth with NextAuth
+// Create Vercel Edge-optimized client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
+  },
+  db: {
+    schema: "public",
+  },
+  global: {
+    headers: {
+      "x-client-info": "gravix-chatbot-vercel",
+      "x-connection-string": "pooler", // Use Supabase connection pooler
+    },
+  },
+  // Optimize for Vercel Edge Runtime
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
   },
 });
 

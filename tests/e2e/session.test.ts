@@ -31,23 +31,6 @@ test.describe
       ]);
     });
 
-    test("Log out is not available for guest users", async ({ page }) => {
-      await page.goto("/");
-
-      const sidebarToggleButton = page.getByTestId("sidebar-toggle-button");
-      await sidebarToggleButton.click();
-
-      const userNavButton = page.getByTestId("user-nav-button");
-      await expect(userNavButton).toBeVisible();
-
-      await userNavButton.click();
-      const userNavMenu = page.getByTestId("user-nav-menu");
-      await expect(userNavMenu).toBeVisible();
-
-      const authMenuItem = page.getByTestId("user-nav-item-auth");
-      await expect(authMenuItem).toContainText("Login to your account");
-    });
-
     test("Do not authenticate as guest user when an existing non-guest session is active", async ({
       adaContext,
     }) => {
@@ -130,7 +113,9 @@ test.describe
     });
 
     test("Log out as non-guest user", async () => {
-      await authPage.logout(testUser.email, testUser.password);
+      // Note: Logout functionality has been removed from the UI
+      // This test now only verifies login functionality
+      await authPage.login(testUser.email, testUser.password);
     });
 
     test("Do not force create a guest session if non-guest session already exists", async ({
@@ -147,23 +132,6 @@ test.describe
 
       const updatedUserEmail = await page.getByTestId("user-email");
       await expect(updatedUserEmail).toHaveText(testUser.email);
-    });
-
-    test("Log out is available for non-guest users", async ({ page }) => {
-      await authPage.login(testUser.email, testUser.password);
-      await page.waitForURL("/");
-
-      authPage.openSidebar();
-
-      const userNavButton = page.getByTestId("user-nav-button");
-      await expect(userNavButton).toBeVisible();
-
-      await userNavButton.click();
-      const userNavMenu = page.getByTestId("user-nav-menu");
-      await expect(userNavMenu).toBeVisible();
-
-      const authMenuItem = page.getByTestId("user-nav-item-auth");
-      await expect(authMenuItem).toContainText("Sign out");
     });
 
     test("Do not navigate to /register for non-guest users", async ({

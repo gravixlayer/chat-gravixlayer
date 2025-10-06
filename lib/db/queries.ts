@@ -13,17 +13,29 @@ const useSupabase = !!(
   process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
 );
 
-// Import Supabase queries if available
+// Import Supabase queries if available (with global caching)
 let supabaseQueries: any = null;
+
+// Singleton pattern - initialize once and cache
 if (useSupabase) {
-  try {
+  if (global.__supabase_initialized) {
+    // Use cached module without logging
     supabaseQueries = require("./supabase-queries");
-    console.log("✅ Using Supabase database for multi-user support");
-  } catch (error) {
-    console.warn(
-      "⚠️ Supabase queries not available, falling back to in-memory storage"
-    );
+  } else {
+    try {
+      supabaseQueries = require("./supabase-queries");
+      global.__supabase_initialized = true;
+      // Only log once
+      console.log("✅ Supabase initialized");
+    } catch (error) {
+      console.warn("⚠️ Supabase not available, using in-memory storage");
+    }
   }
+}
+
+// Declare global type
+declare global {
+  var __supabase_initialized: boolean | undefined;
 }
 
 // ⚠️ WARNING: This in-memory storage is NOT suitable for production!

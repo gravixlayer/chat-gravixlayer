@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { GravixLogo } from "@/components/gravix-logo";
 import { SessionCleanup } from "@/components/session-cleanup";
+import { SocialLinks } from "@/components/social-links";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
 
@@ -29,6 +30,7 @@ export default async function Layout({
           <GravixLogo />
           <SessionCleanup />
           <SidebarInset>{children}</SidebarInset>
+          <SocialLinks />
         </SidebarProvider>
       </DataStreamProvider>
     </>

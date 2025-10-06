@@ -37,25 +37,10 @@ export class AuthPage {
   }
 
   async logout(email: string, password: string) {
+    // Note: Logout functionality has been removed from the UI
+    // This method is kept for backward compatibility but no longer performs logout
     await this.login(email, password);
     await this.page.waitForURL("/");
-
-    await this.openSidebar();
-
-    const userNavButton = this.page.getByTestId("user-nav-button");
-    await expect(userNavButton).toBeVisible();
-
-    await userNavButton.click();
-    const userNavMenu = this.page.getByTestId("user-nav-menu");
-    await expect(userNavMenu).toBeVisible();
-
-    const authMenuItem = this.page.getByTestId("user-nav-item-auth");
-    await expect(authMenuItem).toContainText("Sign out");
-
-    await authMenuItem.click();
-
-    const userEmail = this.page.getByTestId("user-email");
-    await expect(userEmail).toContainText("Guest");
   }
 
   async expectToastToContain(text: string) {

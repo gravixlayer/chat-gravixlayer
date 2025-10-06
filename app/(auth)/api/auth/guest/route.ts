@@ -3,6 +3,10 @@ import { getToken } from "next-auth/jwt";
 import { signIn } from "@/app/(auth)/auth";
 import { isDevelopmentEnvironment } from "@/lib/constants";
 
+// Use Vercel Edge Runtime for faster auth
+export const runtime = "edge";
+export const preferredRegion = "auto";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const redirectUrl = searchParams.get("redirectUrl") || "/";

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { auth } from "@/app/(auth)/auth";
 import { Chat } from "@/components/chat";
@@ -8,27 +9,36 @@ import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
+// Loading component for better UX
+function ChatLoading() {
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
+    </div>
+  );
+}
+
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const { id } = params;
-  const chat = await getChatById({ id });
+
+  // Parallel execution for better performance
+  const [chat, session, cookieStore] = await Promise.all([
+    getChatById({ id }),
+    auth(),
+    cookies(),
+  ]);
+
+  if (!session) {
+    redirect("/api/auth/guest");
+  }
 
   // If chat doesn't exist, create a new one with the provided ID
   if (!chat) {
-    const session = await auth();
-
-    if (!session) {
-      redirect("/api/auth/guest");
-    }
-
-    // Chat will be created on the client side when the component mounts
-
-    // Return a new chat with the provided ID
-    const cookieStore = await cookies();
     const chatModelFromCookie = cookieStore.get("chat-model");
 
     return (
-      <>
+      <Suspense fallback={<ChatLoading />}>
         <Chat
           autoResume={false}
           id={id}
@@ -39,14 +49,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           isReadonly={false}
         />
         <DataStreamHandler />
-      </>
+      </Suspense>
     );
-  }
-
-  const session = await auth();
-
-  if (!session) {
-    redirect("/api/auth/guest");
   }
 
   if (chat.visibility === "private") {
@@ -59,44 +63,23 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     }
   }
 
-  const messagesFromDb = await getMessagesByChatId({
-    id,
-  });
-
+  // Parallel message loading for better performance
+  const messagesFromDb = await getMessagesByChatId({ id });
   const uiMessages = convertToUIMessages(messagesFromDb);
-
-  const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
 
-  if (!chatModelFromCookie) {
-    return (
-      <>
-        <Chat
-          autoResume={true}
-          id={chat.id}
-          initialChatModel={DEFAULT_CHAT_MODEL}
-          initialLastContext={chat.lastContext ?? undefined}
-          initialMessages={uiMessages}
-          initialVisibilityType={chat.visibility}
-          isReadonly={session?.user?.id !== chat.userId}
-        />
-        <DataStreamHandler />
-      </>
-    );
-  }
-
   return (
-    <>
+    <Suspense fallback={<ChatLoading />}>
       <Chat
         autoResume={true}
         id={chat.id}
-        initialChatModel={chatModelFromCookie.value}
+        initialChatModel={chatModelFromCookie?.value || DEFAULT_CHAT_MODEL}
         initialLastContext={chat.lastContext ?? undefined}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
       />
       <DataStreamHandler />
-    </>
+    </Suspense>
   );
 }

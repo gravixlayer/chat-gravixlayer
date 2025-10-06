@@ -1,0 +1,32 @@
+# PNPM Configuration for Optimal Performance
+
+# Enable hoisting for better performance
+hoist-pattern[]=*
+
+# Optimize for development speed
+prefer-frozen-lockfile=false
+auto-install-peers=true
+
+# Reduce package resolution time
+resolution-mode=highest
+
+# Enable strict peer dependencies for better caching
+strict-peer-dependencies=false
+
+# Optimize for Vercel deployment
+public-hoist-pattern[]=*eslint*
+public-hoist-pattern[]=*prettier*
+
+# Cache optimizations
+store-dir=~/.pnpm-store
+cache-dir=~/.pnpm-cache
+
+# Faster installs
+prefer-offline=true
+fetch-retries=3
+fetch-retry-factor=2
+fetch-retry-mintimeout=10000
+fetch-retry-maxtimeout=60000
+
+# Development optimizations
+shamefully-hoist=true

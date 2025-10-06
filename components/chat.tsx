@@ -71,16 +71,8 @@ export function Chat({
 
   // Refresh sidebar for new chats and when chat ID changes
   useEffect(() => {
-    console.log(
-      "Chat component mounted/updated - ID:",
-      id,
-      "Messages:",
-      initialMessages.length
-    );
-
     // Always refresh sidebar when component mounts or ID changes
     const refreshSidebar = () => {
-      console.log("Refreshing sidebar...");
       mutate(
         (key) => typeof key === "string" && key.startsWith("/api/history"),
         undefined,
@@ -94,15 +86,12 @@ export function Chat({
     // Delayed refreshes to catch async operations
     const timers = [
       setTimeout(() => {
-        console.log("Delayed sidebar refresh 1");
         refreshSidebar();
       }, 100),
       setTimeout(() => {
-        console.log("Delayed sidebar refresh 2");
         refreshSidebar();
       }, 500),
       setTimeout(() => {
-        console.log("Delayed sidebar refresh 3");
         refreshSidebar();
       }, 1000),
     ];
@@ -156,7 +145,6 @@ export function Chat({
       }
     },
     onFinish: () => {
-      console.log("Message finished, refreshing sidebar...");
       mutate(
         (key) => typeof key === "string" && key.startsWith("/api/history"),
         undefined,
@@ -217,7 +205,6 @@ export function Chat({
         incrementGuestQueryCount();
       }
 
-      console.log("Sending message, refreshing sidebar...");
       // Refresh sidebar immediately when sending a message (for new chats)
       mutate(
         (key) => typeof key === "string" && key.startsWith("/api/history"),
@@ -226,7 +213,7 @@ export function Chat({
       );
 
       // Send the message
-      console.log("Calling sendMessage...");
+
       return await sendMessage(message);
     },
     [sendMessage, mutate]
@@ -293,7 +280,7 @@ export function Chat({
           votes={votes}
         />
 
-        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
+        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl flex-col gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
           {!isReadonly && (
             <MultimodalInput
               attachments={attachments}
@@ -312,6 +299,10 @@ export function Chat({
               usage={usage}
             />
           )}
+          <div className="text-center text-[10px] text-muted-foreground">
+            Your conversations are private and secure. We do not store, share,
+            or use your data for training purposes.
+          </div>
         </div>
       </div>
 
