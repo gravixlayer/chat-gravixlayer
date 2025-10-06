@@ -9,13 +9,13 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model",
-    name: "Llama 3.1 8B",
-    description: "Meta's Llama 3.1 8B model via Gravixlayer API",
+    name: "Llama 3.2 1B",
+    description: "Meta's Llama 3.2 1B model via Gravixlayer API",
   },
   {
     id: "chat-model-reasoning",
-    name: "Llama 3.1 8B (Reasoning)",
+    name: "Qwen 3 0.6B (Reasoning)",
     description:
-      "Meta's Llama 3.1 8B with chain-of-thought reasoning via Gravixlayer API",
+      "Qwen 3 0.6B with chain-of-thought reasoning via Gravixlayer API",
   },
 ];

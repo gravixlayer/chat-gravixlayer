@@ -21,6 +21,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       redirect("/api/auth/guest");
     }
 
+    // Chat will be created on the client side when the component mounts
+
     // Return a new chat with the provided ID
     const cookieStore = await cookies();
     const chatModelFromCookie = cookieStore.get("chat-model");

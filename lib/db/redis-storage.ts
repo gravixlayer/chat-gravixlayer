@@ -2,11 +2,7 @@
 import { Redis } from "@upstash/redis";
 
 // Initialize Redis (you'd need REDIS_URL in production)
-const redis = process.env.REDIS_URL
-  ? new Redis({
-      url: process.env.REDIS_URL,
-    })
-  : null;
+const redis = process.env.REDIS_URL ? Redis.fromEnv() : null;
 
 export async function getRedisData<T>(key: string): Promise<T[]> {
   if (!redis) {

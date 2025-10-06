@@ -8,7 +8,7 @@
 class ClientDB {
   private readonly dbName = "gravix-chat-db";
   private readonly version = 1;
-  private readonly db: IDBDatabase | null = null;
+  private db: IDBDatabase | null = null;
 
   async init() {
     if (typeof window === "undefined") {

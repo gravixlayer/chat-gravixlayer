@@ -30,5 +30,6 @@ export async function GET(request: NextRequest) {
     endingBefore,
   });
 
+  console.log("History API returning chats:", chats);
   return Response.json(chats);
 }

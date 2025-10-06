@@ -5,7 +5,7 @@ import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
+
 import { ChatHeader } from "@/components/chat-header";
 import {
   AlertDialog,
@@ -30,7 +30,7 @@ import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
-import { getChatHistoryPaginationKey } from "./sidebar-history";
+
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -68,6 +68,47 @@ export function Chat({
   useEffect(() => {
     currentModelIdRef.current = currentModelId;
   }, [currentModelId]);
+
+  // Refresh sidebar for new chats and when chat ID changes
+  useEffect(() => {
+    console.log(
+      "Chat component mounted/updated - ID:",
+      id,
+      "Messages:",
+      initialMessages.length
+    );
+
+    // Always refresh sidebar when component mounts or ID changes
+    const refreshSidebar = () => {
+      console.log("Refreshing sidebar...");
+      mutate(
+        (key) => typeof key === "string" && key.startsWith("/api/history"),
+        undefined,
+        { revalidate: true }
+      );
+    };
+
+    // Immediate refresh
+    refreshSidebar();
+
+    // Delayed refreshes to catch async operations
+    const timers = [
+      setTimeout(() => {
+        console.log("Delayed sidebar refresh 1");
+        refreshSidebar();
+      }, 100),
+      setTimeout(() => {
+        console.log("Delayed sidebar refresh 2");
+        refreshSidebar();
+      }, 500),
+      setTimeout(() => {
+        console.log("Delayed sidebar refresh 3");
+        refreshSidebar();
+      }, 1000),
+    ];
+
+    return () => timers.forEach(clearTimeout);
+  }, [id, mutate]);
 
   const {
     messages,
@@ -115,7 +156,12 @@ export function Chat({
       }
     },
     onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
+      console.log("Message finished, refreshing sidebar...");
+      mutate(
+        (key) => typeof key === "string" && key.startsWith("/api/history"),
+        undefined,
+        { revalidate: true }
+      );
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -171,10 +217,19 @@ export function Chat({
         incrementGuestQueryCount();
       }
 
+      console.log("Sending message, refreshing sidebar...");
+      // Refresh sidebar immediately when sending a message (for new chats)
+      mutate(
+        (key) => typeof key === "string" && key.startsWith("/api/history"),
+        undefined,
+        { revalidate: true }
+      );
+
       // Send the message
+      console.log("Calling sendMessage...");
       return await sendMessage(message);
     },
-    [sendMessage]
+    [sendMessage, mutate]
   );
 
   const searchParams = useSearchParams();

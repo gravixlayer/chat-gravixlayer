@@ -33,13 +33,17 @@ import {
   saveChat,
   saveMessages,
   updateChatLastContextById,
+  updateChatTitleById,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 // Rate limiting moved to client side
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
-import { generateTitleFromUserMessage } from "../../actions";
+import {
+  generateTitleFromConversation,
+  generateTitleFromUserMessage,
+} from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
@@ -177,10 +181,22 @@ export async function POST(request: Request) {
     const userApiKey = request.headers.get("x-user-api-key");
     const provider = getProvider(userApiKey || undefined);
 
+    if (!provider) {
+      return new ChatSDKError(
+        "bad_request:api",
+        "Provider initialization failed"
+      ).toResponse();
+    }
+
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
+        const languageModel = provider.languageModel(selectedChatModel);
+        if (!languageModel) {
+          throw new Error(`Language model not found: ${selectedChatModel}`);
+        }
+
         const result = streamText({
-          model: provider.languageModel(selectedChatModel),
+          model: languageModel,
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
@@ -194,7 +210,7 @@ export async function POST(request: Request) {
           onFinish: async ({ usage }) => {
             try {
               const providers = await getTokenlensCatalog();
-              const modelId = provider.languageModel(selectedChatModel).modelId;
+              const modelId = languageModel?.modelId;
               if (!modelId) {
                 finalMergedUsage = usage;
                 dataStream.write({
@@ -218,7 +234,11 @@ export async function POST(request: Request) {
               dataStream.write({ type: "data-usage", data: finalMergedUsage });
             } catch (err) {
               console.warn("TokenLens enrichment failed", err);
-              finalMergedUsage = usage;
+              finalMergedUsage = usage || {
+                inputTokens: 0,
+                outputTokens: 0,
+                totalTokens: 0,
+              };
               dataStream.write({ type: "data-usage", data: finalMergedUsage });
             }
           },
@@ -244,6 +264,23 @@ export async function POST(request: Request) {
             chatId: id,
           })),
         });
+
+        // Update chat title after 3rd message (when we have more context)
+        const totalMessages = uiMessages.length + messages.length;
+        if (totalMessages >= 4 && totalMessages <= 6) {
+          try {
+            const allMessages = [...uiMessages, ...messages];
+            const newTitle = await generateTitleFromConversation({
+              messages: allMessages,
+            });
+            await updateChatTitleById({
+              chatId: id,
+              title: newTitle,
+            });
+          } catch (err) {
+            console.warn("Unable to update chat title", id, err);
+          }
+        }
 
         if (finalMergedUsage) {
           try {

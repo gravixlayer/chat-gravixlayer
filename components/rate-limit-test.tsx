@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export function RateLimitTest() {
   const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Initialize count from localStorage
+    if (typeof window !== "undefined") {
+      const storedCount = Number.parseInt(
+        localStorage.getItem("guest_query_count") || "0",
+        10
+      );
+      setCount(storedCount);
+    }
+  }, []);
 
   const handleIncrement = () => {
     if (typeof window !== "undefined") {

@@ -8,6 +8,24 @@ import { generateUUID } from "../utils";
 import type { Chat, DBMessage, Suggestion, User } from "./schema";
 import { generateHashedPassword } from "./utils";
 
+// Check if we should use Supabase
+const useSupabase = !!(
+  process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
+);
+
+// Import Supabase queries if available
+let supabaseQueries: any = null;
+if (useSupabase) {
+  try {
+    supabaseQueries = require("./supabase-queries");
+    console.log("✅ Using Supabase database for multi-user support");
+  } catch (error) {
+    console.warn(
+      "⚠️ Supabase queries not available, falling back to in-memory storage"
+    );
+  }
+}
+
 // ⚠️ WARNING: This in-memory storage is NOT suitable for production!
 // Multiple users will share the same data, causing privacy issues and data leaks.
 // For production, you MUST use a real database (PostgreSQL, MySQL, etc.)
@@ -48,7 +66,11 @@ const suggestions: Suggestion[] = globalThis.__db_suggestions;
 const votes: any[] = globalThis.__db_votes;
 const streams: any[] = globalThis.__db_streams;
 
-export function getUser(email: string): User[] {
+export async function getUser(email: string): Promise<User[]> {
+  if (useSupabase && supabaseQueries) {
+    return supabaseQueries.getUser(email);
+  }
+
   try {
     return users.filter((user) => user.email === email);
   } catch (_error) {
@@ -60,8 +82,11 @@ export function getUser(email: string): User[] {
 }
 
 export async function createUser(email: string, password: string) {
-  // Simulate async operation for future database compatibility
-  await Promise.resolve();
+  if (useSupabase && supabaseQueries) {
+    const users = await supabaseQueries.createUser(email, password);
+    return users[0]; // Return single user for compatibility
+  }
+
   const hashedPassword = generateHashedPassword(password);
 
   try {
@@ -110,8 +135,10 @@ export async function saveChat({
   title: string;
   visibility: VisibilityType;
 }) {
-  // Simulate async operation for future database compatibility
-  await Promise.resolve();
+  if (useSupabase && supabaseQueries) {
+    return supabaseQueries.saveChat({ id, userId, title, visibility });
+  }
+
   try {
     const newChat: Chat = {
       id,
@@ -517,6 +544,33 @@ export async function updateChatVisiblityById({
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to update chat visibility by id"
+    );
+  }
+}
+
+export async function updateChatTitleById({
+  chatId,
+  title,
+}: {
+  chatId: string;
+  title: string;
+}) {
+  if (useSupabase && supabaseQueries) {
+    return supabaseQueries.updateChatTitleById({ chatId, title });
+  }
+
+  // Simulate async operation for future database compatibility
+  await Promise.resolve();
+  try {
+    const chat = chats.find((c) => c.id === chatId);
+    if (chat) {
+      chat.title = title;
+    }
+    return chat;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update chat title by id"
     );
   }
 }

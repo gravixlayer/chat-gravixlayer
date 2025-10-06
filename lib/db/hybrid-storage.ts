@@ -13,8 +13,6 @@ export class HybridStorage {
   private readonly cache = new Map<string, any>();
 
   async getChats(userId: string): Promise<Chat[]> {
-    // Simulate async operation for future database compatibility
-    await Promise.resolve();
     const cacheKey = `chats-${userId}`;
 
     // Try cache first
@@ -61,8 +59,6 @@ export class HybridStorage {
   }
 
   async getMessages(chatId: string): Promise<DBMessage[]> {
-    // Simulate async operation for future database compatibility
-    await Promise.resolve();
     const cacheKey = `messages-${chatId}`;
 
     if (this.cache.has(cacheKey)) {

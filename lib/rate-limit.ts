@@ -44,3 +44,11 @@ export function getUserApiKey(): string | null {
 export function getRemainingQueries(): number {
   return Math.max(0, MAX_GUEST_QUERIES - getGuestQueryCount());
 }
+
+export function resetGuestQueryCount(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  localStorage.removeItem("guest_query_count");
+  window.dispatchEvent(new Event("queryCountUpdate"));
+}

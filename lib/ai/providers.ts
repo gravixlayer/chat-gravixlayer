@@ -17,7 +17,7 @@ function createGravixlayerProvider(apiKey: string) {
 
 // Default provider using server API key
 const defaultGravixlayer = createGravixlayerProvider(
-  process.env.GRAVIXLAYER_API_KEY || ""
+  process.env.GRAVIXLAYER_API_KEY || "test-api-key-for-development"
 );
 
 // Function to get provider with user's API key or default
@@ -45,13 +45,13 @@ export function getProvider(userApiKey?: string) {
 
   return customProvider({
     languageModels: {
-      "chat-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
+      "chat-model": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
       "chat-model-reasoning": wrapLanguageModel({
-        model: gravixlayer("meta-llama/llama-3.1-8b-instruct"),
+        model: gravixlayer("qwen/qwen3-0.6b"),
         middleware: extractReasoningMiddleware({ tagName: "think" }),
       }),
-      "title-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
-      "artifact-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
+      "title-model": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
+      "artifact-model": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
     },
   });
 }

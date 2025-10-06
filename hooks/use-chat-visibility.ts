@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import type { VisibilityType } from "@/components/visibility-selector";
 
 export function useChatVisibility({
-  _chatId,
-  _initialVisibilityType,
+  chatId: _chatId,
+  initialVisibilityType: _initialVisibilityType,
 }: {
   chatId: string;
   initialVisibilityType: VisibilityType;

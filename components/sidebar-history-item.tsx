@@ -42,11 +42,14 @@ const PureChatItem = ({
     initialVisibilityType: chat.visibility,
   });
 
+  // Use the chat title directly - it will be updated by the server
+  const displayTitle = chat.title;
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
         <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
-          <span>{chat.title}</span>
+          <span>{displayTitle}</span>
         </Link>
       </SidebarMenuButton>
 

@@ -33,6 +33,30 @@ export async function generateTitleFromUserMessage({
   return title;
 }
 
+export async function generateTitleFromConversation({
+  messages,
+}: {
+  messages: UIMessage[];
+}) {
+  const conversationText = messages
+    .slice(0, 6) // Use first 6 messages for context
+    .map((msg) => `${msg.role}: ${JSON.stringify(msg.parts)}`)
+    .join("\n");
+
+  const { text: title } = await generateText({
+    model: getProvider().languageModel("title-model"),
+    system: `\n
+    - you will generate a short title based on the conversation context
+    - ensure it is not more than 80 characters long
+    - the title should capture the main topic or theme of the conversation
+    - do not use quotes or colons
+    - focus on the key subject matter being discussed`,
+    prompt: conversationText,
+  });
+
+  return title;
+}
+
 export async function deleteTrailingMessages({ id }: { id: string }) {
   const [message] = await getMessageById({ id });
 
