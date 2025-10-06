@@ -8,8 +8,46 @@ import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  title: {
+    default: "GravixLayer AI Chat",
+    template: "%s | GravixLayer AI Chat",
+  },
+  description:
+    "Advanced AI chat application powered by GravixLayer - Experience intelligent conversations with cutting-edge AI technology.",
+  keywords: [
+    "AI",
+    "Chat",
+    "GravixLayer",
+    "Artificial Intelligence",
+    "Conversation",
+    "Assistant",
+  ],
+  authors: [{ name: "GravixLayer" }],
+  creator: "GravixLayer",
+  publisher: "GravixLayer",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/icon.png",
+  },
+  manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://chat.vercel.ai",
+    title: "GravixLayer AI Chat",
+    description: "Advanced AI chat application powered by GravixLayer",
+    siteName: "GravixLayer AI Chat",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GravixLayer AI Chat",
+    description: "Advanced AI chat application powered by GravixLayer",
+    creator: "@GravixLayer",
+  },
 };
 
 export const viewport = {
