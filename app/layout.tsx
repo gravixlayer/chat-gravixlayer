@@ -9,22 +9,22 @@ import { SessionProvider } from "next-auth/react";
 export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
   title: {
-    default: "GravixLayer AI Chat",
-    template: "%s | GravixLayer AI Chat",
+    default: "Gravix Layer AI Chat",
+    template: "%s | Gravix Layer AI Chat",
   },
   description:
-    "Advanced AI chat application powered by GravixLayer - Experience intelligent conversations with cutting-edge AI technology.",
+    "Advanced AI chat application powered by Gravix Layer - Experience intelligent conversations with cutting-edge AI technology.",
   keywords: [
     "AI",
     "Chat",
-    "GravixLayer",
+    "Gravix Layer",
     "Artificial Intelligence",
     "Conversation",
     "Assistant",
   ],
-  authors: [{ name: "GravixLayer" }],
-  creator: "GravixLayer",
-  publisher: "GravixLayer",
+  authors: [{ name: "Gravix Layer" }],
+  creator: "Gravix Layer",
+  publisher: "Gravix Layer",
   icons: {
     icon: [
       { url: "/icon.png", sizes: "32x32", type: "image/png" },
