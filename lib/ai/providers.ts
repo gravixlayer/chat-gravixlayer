@@ -72,5 +72,8 @@ export function getProvider(userApiKey?: string) {
   });
 }
 
-// Default provider for backward compatibility
-export const myProvider = getProvider();
+// Default provider for backward compatibility. `getProvider` can return
+// `null` when no server key is configured; expose a small client-safe
+// stub so client code that imports `myProvider` won't crash at runtime.
+export const myProvider =
+  getProvider() || { languageModel: (id: string) => null };
