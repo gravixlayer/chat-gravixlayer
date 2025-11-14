@@ -54,6 +54,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    // Also exclude common PWA/metadata files which should be publicly accessible
+    // (manifest.json and manifest.webmanifest) to avoid redirect loops for
+    // browsers requesting these resources.
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|manifest.webmanifest).*)",
   ],
 };

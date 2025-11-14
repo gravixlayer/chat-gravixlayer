@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   compress: false,
   generateEtags: false,
   poweredByHeader: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatar.vercel.sh",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
