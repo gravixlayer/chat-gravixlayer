@@ -188,12 +188,21 @@ export async function POST(request: Request) {
       ).toResponse();
     }
 
+    // Early validation: ensure the selected language model exists on the
+    // provider before creating the stream. Returning a descriptive error
+    // here prevents an unhandled exception inside the stream that results
+    // in a generic 503 response.
+    const preflightLanguageModel = provider.languageModel(selectedChatModel);
+    if (!preflightLanguageModel) {
+      return new ChatSDKError(
+        "bad_request:api",
+        `Language model not found: ${selectedChatModel}`
+      ).toResponse();
+    }
+
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
-        const languageModel = provider.languageModel(selectedChatModel);
-        if (!languageModel) {
-          throw new Error(`Language model not found: ${selectedChatModel}`);
-        }
+        const languageModel = preflightLanguageModel;
 
         const result = streamText({
           model: languageModel,
