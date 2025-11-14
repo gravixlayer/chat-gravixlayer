@@ -15,10 +15,20 @@ function createGravixlayerProvider(apiKey: string) {
   });
 }
 
-// Default provider using server API key
-const defaultGravixlayer = createGravixlayerProvider(
-  process.env.GRAVIXLAYER_API_KEY || "test-api-key-for-development"
-);
+// Default provider using server API key.
+// In production we should NOT silently fall back to a fake/test API key —
+// that leads to opaque runtime failures (503). If the env var is missing,
+// leave the default provider undefined so callers can surface a clearer
+// error earlier.
+let defaultGravixlayer: ReturnType<typeof createOpenAICompatible> | undefined;
+if (process.env.GRAVIXLAYER_API_KEY) {
+  defaultGravixlayer = createGravixlayerProvider(process.env.GRAVIXLAYER_API_KEY);
+} else {
+  // During tests we may want a fallback; `isTestEnvironment` handling below
+  // will take care of returning mocks. For local development, leaving this
+  // undefined will cause the route to return a descriptive error.
+  defaultGravixlayer = undefined;
+}
 
 // Function to get provider with user's API key or default
 export function getProvider(userApiKey?: string) {
@@ -41,6 +51,12 @@ export function getProvider(userApiKey?: string) {
         "artifact-model": artifactModel,
       },
     });
+  }
+
+  // If we don't have a gravixlayer provider (no server key and no user key),
+  // return null so callers can return a clear `bad_request:api` response.
+  if (!gravixlayer) {
+    return null as any;
   }
 
   return customProvider({
