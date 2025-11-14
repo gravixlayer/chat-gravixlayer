@@ -53,7 +53,7 @@ export async function createAuthenticatedContext({
   await chatPage.createNewChat();
   await chatPage.chooseModelFromSelector("chat-model-reasoning");
   await expect(chatPage.getSelectedModel()).resolves.toEqual(
-    "Llama 3.1 8B (Reasoning)"
+    "Llama 3.1 8B"
   );
 
   await page.waitForTimeout(1000);

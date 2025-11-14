@@ -45,13 +45,13 @@ export function getProvider(userApiKey?: string) {
 
   return customProvider({
     languageModels: {
-      "chat-model": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
+      "chat-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
       "chat-model-reasoning": wrapLanguageModel({
-        model: gravixlayer("qwen/qwen3-0.6b"),
+        model: gravixlayer("qwen/qwen-2.5-vl-7b-instruct"),
         middleware: extractReasoningMiddleware({ tagName: "think" }),
       }),
-      "title-model": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
-      "artifact-model": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
+      "title-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
+      "artifact-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
     },
   });
 }
