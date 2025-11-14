@@ -11,7 +11,7 @@ function createGravixlayerProvider(apiKey: string) {
   return createOpenAICompatible({
     name: "gravixlayer",
     apiKey,
-    baseURL: "https://api.gravixlayer.com/v1/inference",
+    baseURL: "https://api.gravixlayer.com/v1",
   });
 }
 
