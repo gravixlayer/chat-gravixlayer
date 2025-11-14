@@ -327,6 +327,16 @@ export async function POST(request: Request) {
     }
 
     console.error("Unhandled error in chat API:", error, { vercelId });
+
+    // When debugging in production you can set DEBUG_ERRORS=true in the
+    // environment to include the underlying error message as the `cause`
+    // in the response JSON. This is temporary and should only be enabled
+    // while diagnosing issues (do NOT enable long-term in prod).
+    if (process.env.DEBUG_ERRORS === "true") {
+      const cause = error instanceof Error ? error.message : String(error);
+      return new ChatSDKError("offline:chat", cause).toResponse();
+    }
+
     return new ChatSDKError("offline:chat").toResponse();
   }
 }
