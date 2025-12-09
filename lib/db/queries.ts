@@ -115,6 +115,10 @@ export async function createUser(email: string, password: string) {
 }
 
 export async function createGuestUser() {
+  if (useSupabase && supabaseQueries) {
+    return supabaseQueries.createGuestUser();
+  }
+
   // Simulate async operation for future database compatibility
   await Promise.resolve();
   const email = `guest-${Date.now()}`;
