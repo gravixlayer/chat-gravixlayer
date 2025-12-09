@@ -69,7 +69,13 @@ export const {
       id: "guest",
       credentials: {},
       async authorize() {
-        const [guestUser] = await createGuestUser();
+        const guestUsers = await createGuestUser();
+        if (!guestUsers || guestUsers.length === 0) {
+          // Throw an error or return null if no guest user could be created
+          console.error("Failed to create a guest user.");
+          return null;
+        }
+        const [guestUser] = guestUsers;
         return { ...guestUser, type: "guest" };
       },
     }),
