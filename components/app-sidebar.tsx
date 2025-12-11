@@ -45,7 +45,8 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   height={24}
                   src="/images/gravixlayer-logo.png"
                   style={{ width: "auto", height: "24px" }}
-                  width={24}
+                  width={22}
+                  unoptimized
                 />
                 <span style={{ letterSpacing: "-0.05em" }}>
                   Gravix<span style={{ color: "#4f46e4" }}> Layer</span>

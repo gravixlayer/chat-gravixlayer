@@ -26,7 +26,8 @@ export function GravixLogo() {
           height={28}
           src="/images/gravixlayer-logo.png"
           style={{ width: "auto", height: "28px" }}
-          width={28}
+          width={26}
+          unoptimized
         />
         <span
           className="font-semibold text-lg"

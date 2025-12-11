@@ -20,8 +20,12 @@ export async function generateTitleFromUserMessage({
 }: {
   message: UIMessage;
 }) {
+  const provider = getProvider();
+  if (!provider) {
+    throw new Error("Provider not configured. Please set GRAVIXLAYER_API_KEY.");
+  }
   const { text: title } = await generateText({
-    model: getProvider().languageModel("title-model"),
+    model: provider.languageModel("title-model"),
     system: `\n
     - you will generate a short title based on the first message a user begins a conversation with
     - ensure it is not more than 80 characters long
