@@ -8,10 +8,8 @@ import { generateUUID } from "../utils";
 import type { Chat, DBMessage, Suggestion, User } from "./schema";
 import { generateHashedPassword } from "./utils";
 
-// Check if we should use Supabase
-const useSupabase = !!(
-  process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
-);
+// Force in-memory storage (Supabase disabled)
+const useSupabase = false;
 
 // Import Supabase queries if available (with global caching)
 let supabaseQueries: any = null;
@@ -115,11 +113,7 @@ export async function createUser(email: string, password: string) {
 }
 
 export async function createGuestUser() {
-  if (useSupabase && supabaseQueries) {
-    return supabaseQueries.createGuestUser();
-  }
-
-  // Simulate async operation for future database compatibility
+  // In-memory storage only
   await Promise.resolve();
   const email = `guest-${Date.now()}`;
   const password = await generateHashedPassword(generateUUID());
