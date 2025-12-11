@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { signIn } from "@/app/(auth)/auth";
-import { isDevelopmentEnvironment } from "@/lib/constants";
+import { auth, signIn } from "@/app/(auth)/auth";
 
 // Use Node.js runtime for auth operations
 export const preferredRegion = "auto";
@@ -10,13 +8,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const redirectUrl = searchParams.get("redirectUrl") || "/";
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
-  });
+  const session = await auth();
 
-  if (token) {
+  if (session) {
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
