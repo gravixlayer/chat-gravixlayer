@@ -61,11 +61,11 @@ export function getProvider(userApiKey?: string) {
 
   return customProvider({
     languageModels: {
-      "chat-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
-      "chat-model-reasoning": wrapLanguageModel({
-        model: gravixlayer("qwen/qwen-2.5-vl-7b-instruct"),
-        middleware: extractReasoningMiddleware({ tagName: "think" }),
-      }),
+      "qwen-2.5-vl-7b": gravixlayer("qwen/qwen-2.5-vl-7b-instruct"),
+      "gemma-3-12b": gravixlayer("google/gemma-3-12b-it"),
+      "llama-3.2-1b": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
+      "llama-3.2-3b": gravixlayer("meta-llama/llama-3.2-3b-instruct"),
+      "llama-3.1-8b": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
       "title-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
       "artifact-model": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
     },
