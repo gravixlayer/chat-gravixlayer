@@ -12,7 +12,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
    */
   guest: {
     maxMessagesPerDay: 20,
-    availableChatModelIds: ["qwen-2.5-vl-7b", "llama-3.2-1b", "llama-3.2-3b", "llama-3.1-8b"],
+    availableChatModelIds: ["qwen/qwen-2.5-vl-7b-instruct", "meta-llama/llama-3.2-1b-instruct", "meta-llama/llama-3.2-3b-instruct", "meta-llama/llama-3.1-8b-instruct"],
   },
 
   /*
@@ -20,7 +20,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
    */
   regular: {
     maxMessagesPerDay: 100,
-    availableChatModelIds: ["qwen-2.5-vl-7b", "llama-3.2-1b", "llama-3.2-3b", "llama-3.1-8b"],
+    availableChatModelIds: ["qwen/qwen-2.5-vl-7b-instruct", "meta-llama/llama-3.2-1b-instruct", "meta-llama/llama-3.2-3b-instruct", "meta-llama/llama-3.1-8b-instruct"],
   },
 
   /*
