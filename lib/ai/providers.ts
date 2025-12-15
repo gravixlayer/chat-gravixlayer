@@ -62,7 +62,6 @@ export function getProvider(userApiKey?: string) {
   return customProvider({
     languageModels: {
       "qwen-2.5-vl-7b": gravixlayer("qwen/qwen-2.5-vl-7b-instruct"),
-      "gemma-3-12b": gravixlayer("google/gemma-3-12b-it"),
       "llama-3.2-1b": gravixlayer("meta-llama/llama-3.2-1b-instruct"),
       "llama-3.2-3b": gravixlayer("meta-llama/llama-3.2-3b-instruct"),
       "llama-3.1-8b": gravixlayer("meta-llama/llama-3.1-8b-instruct"),
